@@ -1,1 +1,0 @@
-# claim-status-assistant-technical-case
