@@ -1,0 +1,42 @@
+name: Build technical case artifacts
+
+on:
+  push:
+    paths:
+      - "scripts/build_artifacts.py"
+      - ".github/workflows/build-artifacts.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-dejavu-core
+          python -m pip install --upgrade pip
+          pip install python-docx openpyxl python-pptx reportlab
+
+      - name: Build files
+        run: python scripts/build_artifacts.py
+
+      - name: Commit generated artifacts
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add artifacts/
+          git diff --cached --quiet && exit 0
+          git commit -m "docs: build final technical case artifacts"
+          git push
